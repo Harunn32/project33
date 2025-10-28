@@ -1,0 +1,31 @@
+# İş akışının adı
+name: Deploy to EC2
+
+# Tetikleyici: 'main' branch'ine her 'push' yapıldığında çalış
+on:
+  push:
+    branches:
+      - main
+
+# Yapılacak işler
+jobs:
+  deploy:
+    # Bu iş, GitHub'ın sağladığı sanal bir Ubuntu sunucuda çalışacak
+    runs-on: ubuntu-latest
+
+    steps:
+    # Adım 1: SSH komutunu çalıştırabilmek için popüler bir Action (hazır araç) kullan
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        # GitHub Secrets'tan gizli bilgileri çek
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        port: 22
+
+        # EC2 Sunucumuzda çalıştırılacak komutlar:
+        script: |
+          cd /home/ubuntu/project33
+          git pull
+          echo "Web sitesi basariyla guncellendi!"
