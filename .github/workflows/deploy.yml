@@ -26,6 +26,7 @@ jobs:
 
         # EC2 Sunucumuzda çalıştırılacak komutlar:
         script: |
-          cd /home/ubuntu/project33
-          git pull
-          echo "Web sitesi basariyla guncellendi!"
+              cd /home/ubuntu/project33
+              git fetch --all
+              git reset --hard origin/main
+              echo "Web sitesi basariyla guncellendi!"
