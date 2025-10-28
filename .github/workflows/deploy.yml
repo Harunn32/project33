@@ -29,4 +29,4 @@ jobs:
               cd /home/ubuntu/project33
               git fetch --all
               git reset --hard origin/main
-              echo "Web sitesi basariyla guncellendi!"
+              echo "Web sitesi basariyla guncellendi!  olleeeeyyyyyyyy"
