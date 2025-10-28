@@ -26,7 +26,27 @@ jobs:
 
         # EC2 Sunucumuzda çalıştırılacak komutlar:
         script: |
+              # Adım 1: En son kodu (Dockerfile dahil) çek
               cd /home/ubuntu/project33
               git fetch --all
               git reset --hard origin/main
-              echo "Web sitesi basariyla guncellendi!"
+              
+              # Adım 2: Yeni kodla Docker imajını build et (inşa et)
+              # İmaja 'project33-sitem' adını veriyoruz
+              docker build -t project33-sitem .
+              
+              # Adım 3: Eski konteyneri durdur ve sil (Eğer varsa)
+              # 'my-website' adındaki konteyneri durdur, hata verirse (yoksa) devam et (|| true)
+              docker stop my-website || true
+              # 'my-website' adındaki konteyneri sil, hata verirse devam et
+              docker rm my-website || true
+              
+              # Adım 4: Yeni imajdan yeni konteyneri çalıştır
+              # Adı 'my-website' olsun ki bir sonrakinde bulup silebilelim
+              # Sunucunun 8080 portunu konteynerin 80 portuna bağla
+              docker run -d --name my-website -p 8080:80 project33-sitem
+              
+              # Adım 5 (Bonus): Eski, kullanılmayan imajları temizle
+              docker image prune -f
+              
+              echo "Docker imaji guncellendi ve yeni konteyner baslatildi!"
