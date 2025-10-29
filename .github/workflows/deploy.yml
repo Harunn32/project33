@@ -1,52 +1,40 @@
-# İş akışının adı
 name: Deploy to EC2
 
-# Tetikleyici: 'main' branch'ine her 'push' yapıldığında çalış
+# Bu iş akışı, 'main' branch'ine her push yapıldığında tetiklenecek
 on:
   push:
     branches:
-      - main
+      - main  # Eğer branch adınız 'master' ise burayı 'master' olarak değiştirin
 
-# Yapılacak işler
 jobs:
   deploy:
-    # Bu iş, GitHub'ın sağladığı sanal bir Ubuntu sunucuda çalışacak
+    # Bu job, GitHub tarafından sağlanan sanal bir Ubuntu makinesinde çalışacak
     runs-on: ubuntu-latest
 
     steps:
-    # Adım 1: SSH komutunu çalıştırabilmek için popüler bir Action (hazır araç) kullan
+    # 1. Adım: Kodumuzu (repository) bu sanal makineye kopyalar
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. Adım: Sunucuya SSH ile bağlanır ve deploy komutlarını çalıştırır
     - name: Deploy to EC2
       uses: appleboy/ssh-action@master
       with:
-        # GitHub Secrets'tan gizli bilgileri çek
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_KEY }}
-        port: 22
-
-        # EC2 Sunucumuzda çalıştırılacak komutlar:
+        host: ${{ secrets.HOST }}             # GitHub Secrets'tan HOST'u okur
+        username: ${{ secrets.USERNAME }}     # GitHub Secrets'tan USERNAME'i okur
+        key: ${{ secrets.PRIVATE_KEY }}       # GitHub Secrets'tan PRIVATE_KEY'i okur
+        port: 22                              # SSH portu
+        
+        # Sunucuda çalıştırılacak komutlar:
         script: |
-              # Adım 1: En son kodu (Dockerfile dahil) çek
-              cd /home/ubuntu/project33
-              git fetch --all
-              git reset --hard origin/main
-              
-              # Adım 2: Yeni kodla Docker imajını build et (inşa et)
-              # İmaja 'project33-sitem' adını veriyoruz
-              docker build -t project33-sitem .
-              
-              # Adım 3: Eski konteyneri durdur ve sil (Eğer varsa)
-              # 'my-website' adındaki konteyneri durdur, hata verirse (yoksa) devam et (|| true)
-              docker stop my-website || true
-              # 'my-website' adındaki konteyneri sil, hata verirse devam et
-              docker rm my-website || true
-              
-              # Adım 4: Yeni imajdan yeni konteyneri çalıştır
-              # Adı 'my-website' olsun ki bir sonrakinde bulup silebilelim
-              # Sunucunun 8080 portunu konteynerin 80 portuna bağla
-              docker run -d --name my-website -p 8080:80 project33-sitem
-              
-              # Adım 5 (Bonus): Eski, kullanılmayan imajları temizle
-              docker image prune -f
-              
-              echo "Docker imaji guncellendi ve yeni konteyner baslatildi!"
+          cd ${{ secrets.PROJECT_PATH }}
+          git pull
+          docker build -t benim-uygulamam .
+          
+          # 'my-web-app' adında bir container varsa durdur ve kaldır
+          # '|| true' ekliyoruz ki container bulunamazsa bile hata verip scripti durdurmasın
+          docker stop my-web-app || true
+          docker rm my-web-app || true
+          
+          # Yeni imajdan yeni container'ı sabit isimle başlat
+          docker run -d -p 80:80 --name my-web-app benim-uygulamam
