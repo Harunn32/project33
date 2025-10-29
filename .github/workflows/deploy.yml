@@ -31,8 +31,8 @@ jobs:
           git pull
           docker build -t benim-uygulamam .
           
-          # 'my-web-app' adında bir container varsa durdur ve kaldır
-          # '|| true' ekliyoruz ki container bulunamazsa bile hata verip scripti durdurmasın
+        # 'my-web-app' adında bir container varsa durdur ve kaldır
+        # '|| true' ekliyoruz ki container bulunamazsa bile hata verip scripti durdurmasın
           docker stop my-web-app || true
           docker rm my-web-app || true
           
